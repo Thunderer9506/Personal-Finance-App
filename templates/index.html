@@ -7,8 +7,13 @@
     <link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
 </head>
 <body>
+    <!-- ...existing code... -->
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+    <!-- ...existing code... -->
     <h3>Current Balance</h3>
-    <h1>0.00</h1>
+    <h1>{{amount}}</h1>
     <form method="post">
         <label for="amount">Enter: </label>
         <input type="text" id="amount" name="amount" placeholder="0.00">
@@ -22,12 +27,18 @@
         <br>
         <br>
         <label for="categories">Choose Category</label>
-        <select name="categories" id="expenseCategories">
+        <select name="categories" id="categories">
             {% for item in category.expense %}
                 <option value="{{item | lower}}">{{item}}</option>
             {% endfor %}
         </select>
-        <select name="categories" id="incomeCategories">
+        <!-- Hidden selects for JS -->
+        <select id="expenseOptions" style="display:none;">
+            {% for item in category.expense %}
+                <option value="{{item | lower}}">{{item}}</option>
+            {% endfor %}
+        </select>
+        <select id="incomeOptions" style="display:none;">
             {% for item in category.income %}
                 <option value="{{item | lower}}">{{item}}</option>
             {% endfor %}
