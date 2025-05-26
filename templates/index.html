@@ -16,13 +16,13 @@
     <h1>{{amount}}</h1>
     <form method="post">
         <label for="amount">Enter: </label>
-        <input type="text" id="amount" name="amount" placeholder="0.00">
+        <input type="text" id="amount" name="amount" placeholder="0.00" required >
         <span class="date">{{date}}</span>
         <br>
         <p>Choose the Category</p>
-        <input type="radio" name="transactionType" id="expense" value="Expense" checked>
+        <input type="radio" name="transactionType" id="expense" value="Expense" checked required>
         <label for="expense">Expense</label>
-        <input type="radio" name="transactionType" id="income" value="Income">
+        <input type="radio" name="transactionType" id="income" value="Income" required>
         <label for="income">Income</label>
         <br>
         <br>
@@ -65,7 +65,12 @@
             <tr>
                 <td>{{item.id}}</td>
                 <td>{{item.type}}</td>
-                <td>{{item.amount}}</td>
+                {% if item.type == "Expense" %}
+                    <td style="color: red;">{{item.amount}}</td>
+                {% elif item.type == "Income" %}
+                    <td style="color: green;">{{item.amount}}</td>
+                {% endif %}
+                
                 <td>{{item.category | upper}}</td>
                 <td>{{item.description | capitalize}}</td>
                 <td>{{item.date}}</td>
