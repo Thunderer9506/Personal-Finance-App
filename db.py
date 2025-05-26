@@ -4,7 +4,6 @@ class Database:
     def __init__(self):
         self.connection = None  # Placeholder for the connection
         self.cursor = None      # Placeholder for the cursor
-        self.id = 1
 
         try:
             self.connection = sqlite3.connect('finance.db')
@@ -15,7 +14,7 @@ class Database:
 
     def closeConnection(self):
         self.connection.close()
-        
+
     def createTable(self):
         query = '''
                 CREATE TABLE IF NOT EXISTS finance (
@@ -34,7 +33,8 @@ class Database:
 
     def addData(self,type:str,amount:float,category:str,description:str,date:str):
         query = "INSERT INTO finance (ID, TYPE, AMOUNT, CATEGORY, DESCRIPTION, DATE) VALUES (?, ?, ?, ?, ?, ?)"
-        self.cursor.execute(query, (self.id, type, amount, category, description, date))
+        
+        self.cursor.execute(query, (self.getMaxId() + 1, type, amount, category, description, date))
         self.connection.commit()
         print("New row added Successfully")
         # self.closeConnection()
@@ -81,8 +81,12 @@ class Database:
         data = self.cursor.fetchall()
         # self.closeConnection()
         return data
+    def getMaxId(self):
+        self.cursor.execute("SELECT MAX(ID) FROM finance")
+        result = self.cursor.fetchone()
+        return result[0] if result and result[0] is not None else 1
 
-# dbs1 = Database()
+dbs1 = Database()
 
 # dbs1.createTable()
 # print(dbs1.fetchData())
