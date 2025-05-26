@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance App</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
+</head>
+<body>
+    <h3>Current Balance</h3>
+    <h1>0.00</h1>
+    <form method="post">
+        <label for="amount">Enter: </label>
+        <input type="text" id="amount" name="amount" placeholder="0.00">
+        <span class="date">24-05-2005</span>
+        <br>
+        <p>Choose the Category</p>
+        <input type="radio" name="transactionType" id="expense" value="Expense">
+        <label for="expense">Expense</label>
+        <input type="radio" name="transactionType" id="saving" value="Saving">
+        <label for="saving">Saving</label>
+        <br>
+        <br>
+        <label for="categories">Choose Category</label>
+        <select name="categories" id="categories">
+            <option value="food">food</option>
+            <option value="bill">bill</option>
+            <option value="commute">commute</option>
+            <option value="rent">rent</option>
+        </select>
+        <br>
+        <br>
+        <label for="description">Write Desciption</label><br>
+        <textarea name="description" id="description" cols="30" rows="10" placeholder="Reason for transaction"></textarea>
+        <br>
+        <button type="submit">Add Transaction</button>
+    </form>
+
+    <h3>Transaction History</h3>
+    <table>
+        <tr>
+            <th>id</th>
+            <th>type</th>
+            <th>amount</th>
+            <th>category</th>
+            <th>Description</th>
+            <th>date</th>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>saving</td>
+            <td>25</td>
+            <td>food</td>
+            <td>food and dining</td>
+            <td>26-05-2025</td>
+        </tr>
+    </table>
+</body>
+</html>
