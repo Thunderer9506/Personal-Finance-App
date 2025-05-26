@@ -72,9 +72,9 @@ class Database:
             query += " AND DATE = ?"
             params.append(date)
         self.cursor.execute(query, params)
-        data = self.fetchData()
+        # data = self.fetchData()
         # self.closeConnection()
-        return data
+        return self.cursor.fetchall()
     
     def fetchData(self):
         self.cursor.execute("SELECT * FROM finance")
@@ -84,21 +84,21 @@ class Database:
     def getMaxId(self):
         self.cursor.execute("SELECT MAX(ID) FROM finance")
         result = self.cursor.fetchone()
-        return result[0] if result and result[0] is not None else 1
+        return result[0] if result and result[0] is not None else 0
 
 dbs1 = Database()
 
 # dbs1.createTable()
 # print(dbs1.fetchData())
 # dbs1.createTable()
-# dbs1.addData(1, "Expense", 1200.00, "Food", "Lunch at restaurant", "20-05-2025")
-# dbs1.addData(2, "Income", 5000.00, "Salary", "Monthly salary", "21-05-2025")
-# dbs1.addData(3, "Expense", 300.00, "Transportation", "Bus fare", "22-05-2025")
-# dbs1.addData(4, "Expense", 800.00, "Bill", "Electricity bill", "23-05-2025")
-# dbs1.addData(5, "Income", 200.00, "Awards", "Quiz competition", "24-05-2025")
-# dbs1.addData(6, "Expense", 150.00, "Shoping", "Bought a book", "24-05-2025")
-# dbs1.addData(7, "Income", 1000.00, "Rental", "House rent received", "25-05-2025")
-# dbs1.addData(8, "Expense", 400.00, "Education", "Online course", "25-05-2025")
+# dbs1.addData("Expense", 1200.00, "Food", "Lunch at restaurant", "2025-05-20")
+# dbs1.addData("Income", 5000.00, "Salary", "Monthly salary", "2025-05-21")
+# dbs1.addData("Expense", 300.00, "Transportation", "Bus fare", "2025-05-22")
+# dbs1.addData("Expense", 800.00, "Bill", "Electricity bill", "2025-05-23")
+# dbs1.addData("Income", 200.00, "Awards", "Quiz competition", "2025-05-24")
+# dbs1.addData("Expense", 150.00, "Shoping", "Bought a book", "2025-05-24")
+# dbs1.addData("Income", 1000.00, "Rental", "House rent received", "2025-05-25")
+# dbs1.addData("Expense", 400.00, "Education", "Online course", "2025-05-25")
 # print(dbs1.getAmount())
 # # Get all expenses
 # expenses = dbs1.filterData(type="Expense")
