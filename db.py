@@ -4,6 +4,7 @@ class Database:
     def __init__(self):
         self.connection = None  # Placeholder for the connection
         self.cursor = None      # Placeholder for the cursor
+        self.id = 1
 
         try:
             self.connection = sqlite3.connect('finance.db')
@@ -27,13 +28,18 @@ class Database:
         self.connection.commit()
         print("Table Created Successfully")
 
-    def addData(self,id:int,type:str,amount:float,category:str,description:str,date:str):
+    def addData(self,type:str,amount:float,category:str,description:str,date:str):
         query = "INSERT INTO finance (ID, TYPE, AMOUNT, CATEGORY, DESCRIPTION, DATE) VALUES (?, ?, ?, ?, ?, ?)"
-        self.cursor.execute(query, (id, type, amount, category, description, date))
+        self.cursor.execute(query, (self.id, type, amount, category, description, date))
         self.connection.commit()
         print("New row added Successfully")
-    def deleteData(self):
-        pass
+
+    def deleteData(self,id):
+        self.cursor.execute("DELETE FROM finance WHERE ID = ?",(id,))
+        self.connection.commit()
+        print(f"Deleted rows with ID = {id}")
+        return self.fetchData()
+    
     def getAmount(self):
         self.cursor.execute("SELECT * FROM finance")
         data = self.cursor.fetchall()
@@ -44,6 +50,7 @@ class Database:
             elif i[1] == "Income":
                 sum += i[2]
         return sum
+    
     def filterData(self, type=None, category=None, date=None):
         query = "SELECT * FROM finance WHERE 1=1"
         params = []
@@ -58,6 +65,7 @@ class Database:
             params.append(date)
         self.cursor.execute(query, params)
         return self.cursor.fetchall()
+    
     def fetchData(self):
         self.cursor.execute("SELECT * FROM finance")
         data = self.cursor.fetchall()
@@ -77,14 +85,16 @@ dbs1 = Database()
 # dbs1.addData(7, "Income", 1000.00, "Rental", "House rent received", "25-05-2025")
 # dbs1.addData(8, "Expense", 400.00, "Education", "Online course", "25-05-2025")
 # print(dbs1.getAmount())
-# Get all expenses
-expenses = dbs1.filterData(type="Expense")
-print(expenses)
+# # Get all expenses
+# expenses = dbs1.filterData(type="Expense")
+# print(expenses)
 
-# Get all income in "Salary" category
-salary_income = dbs1.filterData(type="Income", category="Salary")
-print(salary_income)
+# # Get all income in "Salary" category
+# salary_income = dbs1.filterData(type="Income", category="Salary")
+# print(salary_income)
 
-# Get all transactions on a specific date
-on_date = dbs1.filterData(date="21-05-2025")
-print(on_date)
+# # Get all transactions on a specific date
+# on_date = dbs1.filterData(date="21-05-2025")
+# print(on_date)
+
+# dbs1.deleteData(3)
