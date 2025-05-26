@@ -23,10 +23,12 @@
         <br>
         <label for="categories">Choose Category</label>
         <select name="categories" id="categories">
-            <option value="food">food</option>
-            <option value="bill">bill</option>
+            {% for item in category.expense %}
+                <option value="{{item | lower}}">{{item}}</option>
+            {% endfor %}
+            <!-- <option value="bill">bill</option>
             <option value="commute">commute</option>
-            <option value="rent">rent</option>
+            <option value="rent">rent</option> -->
         </select>
         <br>
         <br>

@@ -4,8 +4,8 @@ from flask import request
 
 app = Flask(__name__)
 
-expenseCategory = []
-incomeCategory = ['Awards','Coupons','Grants']
+expenseCategory = ['Food','Transportation','Bill','Shoping','Education']
+incomeCategory = ['Salary','Awards','Coupons','Grants','Rental']
 
 
 @app.route("/", methods=["GET","POST"])
@@ -16,5 +16,5 @@ def home():
         print(request.form["categories"])
         print(request.form["description"])
 
-    return render_template('index.html')
+    return render_template('index.html',category = {'expense': expenseCategory,'income':incomeCategory})
 
