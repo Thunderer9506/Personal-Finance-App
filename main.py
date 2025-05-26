@@ -26,14 +26,30 @@ def inject_global():
 
 @app.route("/", methods=["GET","POST"])
 def home():
+    error = None
     if request.method == "POST":
-        global id
-        id += 1
-        data = {'id':id,'type':request.form["transactionType"],'amount': float(request.form["amount"]),'category':request.form["categories"],'description':request.form["description"],'date':todaysDate}
-        transactionHistory.append(data)
-        return redirect('/')
+        amount = request.form.get("amount")
+        transaction_type = request.form.get("transactionType")
+        category = request.form.get("categories")
+        description = request.form.get("description")
+        if not amount or not transaction_type:
+            error = "All fields are required."
+        else:
+            global id
+            id += 1
+            data = {
+                'id': id,
+                'type': transaction_type,
+                'amount': float(amount),
+                'category': category,
+                'description': description,
+                'date': todaysDate
+            }
+            transactionHistory.append(data)
+            return redirect('/')
     return render_template('index.html',
                            category = {'expense': expenseCategory,'income':incomeCategory},
                            history=transactionHistory,
-                           amount = getAmount())
+                           amount = getAmount(),
+                           error = error)
 
