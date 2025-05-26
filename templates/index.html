@@ -43,21 +43,24 @@
     <h3>Transaction History</h3>
     <table>
         <tr>
-            <th>id</th>
-            <th>type</th>
-            <th>amount</th>
-            <th>category</th>
+            <th>Id</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Category</th>
             <th>Description</th>
-            <th>date</th>
+            <th>Date</th>
         </tr>
-        <tr>
-            <td>1</td>
-            <td>income</td>
-            <td>25</td>
-            <td>food</td>
-            <td>food and dining</td>
-            <td>26-05-2025</td>
-        </tr>
+        {% for item in history %}
+            <tr>
+                <td>{{item.id}}</td>
+                <td>{{item.type}}</td>
+                <td>{{item.amount}}</td>
+                <td>{{item.category}}</td>
+                <td>{{item.description}}</td>
+                <td>{{item.date}}</td>
+            </tr>
+        {% endfor %}
+        
     </table>
     <script src="{{url_for('static',filename='main.js')}}"></script>
 </body>
