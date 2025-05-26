@@ -1,14 +1,26 @@
-const expenseRadio = document.getElementById('expense');
-const incomeRadio = document.getElementById('income');
-expenseRadio.addEventListener('change',() => {
-    if(expenseRadio.checked){
-        document.getElementById('incomeCategories').style.display = "none"
-        document.getElementById('expenseCategories').style.display = "inline"
+document.addEventListener('DOMContentLoaded', function() {
+    const expenseRadio = document.getElementById('expense');
+    const incomeRadio = document.getElementById('income');
+    const categories = document.getElementById('categories');
+    const expenseOptions = document.getElementById('expenseOptions');
+    const incomeOptions = document.getElementById('incomeOptions');
+
+    function updateCategories(optionsSelect) {
+        categories.innerHTML = '';
+        for (let option of optionsSelect.options) {
+            categories.appendChild(option.cloneNode(true));
+        }
     }
-})
-incomeRadio.addEventListener('change',() => {
-    if(incomeRadio.checked){
-        document.getElementById('incomeCategories').style.display = "inline"
-        document.getElementById('expenseCategories').style.display = "none"
-    }
-})
+
+    expenseRadio.addEventListener('change', function() {
+        if (expenseRadio.checked) {
+            updateCategories(expenseOptions);
+        }
+    });
+
+    incomeRadio.addEventListener('change', function() {
+        if (incomeRadio.checked) {
+            updateCategories(incomeOptions);
+        }
+    });
+});
