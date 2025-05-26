@@ -15,20 +15,22 @@
         <span class="date">24-05-2005</span>
         <br>
         <p>Choose the Category</p>
-        <input type="radio" name="transactionType" id="expense" value="Expense">
+        <input type="radio" name="transactionType" id="expense" value="Expense" checked>
         <label for="expense">Expense</label>
-        <input type="radio" name="transactionType" id="saving" value="Saving">
-        <label for="saving">Saving</label>
+        <input type="radio" name="transactionType" id="income" value="income">
+        <label for="income">Income</label>
         <br>
         <br>
         <label for="categories">Choose Category</label>
-        <select name="categories" id="categories">
+        <select name="categories" id="expenseCategories">
             {% for item in category.expense %}
                 <option value="{{item | lower}}">{{item}}</option>
             {% endfor %}
-            <!-- <option value="bill">bill</option>
-            <option value="commute">commute</option>
-            <option value="rent">rent</option> -->
+        </select>
+        <select name="categories" id="incomeCategories">
+            {% for item in category.income %}
+                <option value="{{item | lower}}">{{item}}</option>
+            {% endfor %}
         </select>
         <br>
         <br>
@@ -50,12 +52,13 @@
         </tr>
         <tr>
             <td>1</td>
-            <td>saving</td>
+            <td>income</td>
             <td>25</td>
             <td>food</td>
             <td>food and dining</td>
             <td>26-05-2025</td>
         </tr>
     </table>
+    <script src="{{url_for('static',filename='main.js')}}"></script>
 </body>
 </html>
