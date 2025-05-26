@@ -13,6 +13,9 @@ class Database:
         except sqlite3.Error as e:
             print(f"Error connecting to the database: {e}")
 
+    def closeConnection(self):
+        self.connection.close()
+        
     def createTable(self):
         query = '''
                 CREATE TABLE IF NOT EXISTS finance (
@@ -27,18 +30,22 @@ class Database:
         self.cursor.execute(query)
         self.connection.commit()
         print("Table Created Successfully")
+        # self.closeConnection()
 
     def addData(self,type:str,amount:float,category:str,description:str,date:str):
         query = "INSERT INTO finance (ID, TYPE, AMOUNT, CATEGORY, DESCRIPTION, DATE) VALUES (?, ?, ?, ?, ?, ?)"
         self.cursor.execute(query, (self.id, type, amount, category, description, date))
         self.connection.commit()
         print("New row added Successfully")
+        # self.closeConnection()
 
     def deleteData(self,id):
         self.cursor.execute("DELETE FROM finance WHERE ID = ?",(id,))
         self.connection.commit()
         print(f"Deleted rows with ID = {id}")
-        return self.fetchData()
+        data = self.fetchData()
+        # self.closeConnection()
+        return data
     
     def getAmount(self):
         self.cursor.execute("SELECT * FROM finance")
@@ -49,6 +56,7 @@ class Database:
                 sum -= i[2]
             elif i[1] == "Income":
                 sum += i[2]
+        # self.closeConnection()
         return sum
     
     def filterData(self, type=None, category=None, date=None):
@@ -64,14 +72,17 @@ class Database:
             query += " AND DATE = ?"
             params.append(date)
         self.cursor.execute(query, params)
-        return self.cursor.fetchall()
+        data = self.fetchData()
+        # self.closeConnection()
+        return data
     
     def fetchData(self):
         self.cursor.execute("SELECT * FROM finance")
         data = self.cursor.fetchall()
+        # self.closeConnection()
         return data
 
-dbs1 = Database()
+# dbs1 = Database()
 
 # dbs1.createTable()
 # print(dbs1.fetchData())
