@@ -17,7 +17,7 @@
         <p>Choose the Category</p>
         <input type="radio" name="transactionType" id="expense" value="Expense" checked>
         <label for="expense">Expense</label>
-        <input type="radio" name="transactionType" id="income" value="income">
+        <input type="radio" name="transactionType" id="income" value="Income">
         <label for="income">Income</label>
         <br>
         <br>
@@ -55,8 +55,8 @@
                 <td>{{item.id}}</td>
                 <td>{{item.type}}</td>
                 <td>{{item.amount}}</td>
-                <td>{{item.category}}</td>
-                <td>{{item.description}}</td>
+                <td>{{item.category | upper}}</td>
+                <td>{{item.description | capitalize}}</td>
                 <td>{{item.date}}</td>
             </tr>
         {% endfor %}

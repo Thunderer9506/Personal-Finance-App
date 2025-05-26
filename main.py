@@ -19,8 +19,10 @@ def inject_global():
 @app.route("/", methods=["GET","POST"])
 def home():
     if request.method == "POST":
-        data = {'id':id,'type':request.form["transactionType"],'amount': float(request.form["amount"]),'category':request.form["categories"],'description':request.form["description"],'date':todaysDate}
+        global id
         id += 1
+        data = {'id':id,'type':request.form["transactionType"],'amount': float(request.form["amount"]),'category':request.form["categories"],'description':request.form["description"],'date':todaysDate}
+        transactionHistory.append(data)
         redirect('/')
     return render_template('index.html',category = {'expense': expenseCategory,'income':incomeCategory},history=transactionHistory)
 
