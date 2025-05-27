@@ -43,9 +43,7 @@ class Database:
         self.cursor.execute("DELETE FROM finance WHERE ID = ?",(id,))
         self.connection.commit()
         print(f"Deleted rows with ID = {id}")
-        data = self.fetchData()
-        # self.closeConnection()
-        return data
+        return
     
     def getAmount(self):
         self.cursor.execute("SELECT * FROM finance")
