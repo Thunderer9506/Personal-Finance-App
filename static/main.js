@@ -68,7 +68,6 @@ function toggleTheme() {
         localStorage.setItem('theme', 'light');
     }
 }
-
 // Load saved theme
 function loadTheme() {
     const savedTheme = localStorage.getItem('theme');

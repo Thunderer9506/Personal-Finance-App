@@ -42,7 +42,7 @@
                             <label>Category</label>
                             <div class="radio-group">
                                 <div class="radio-item">
-                                    <input type="radio" id="expense" name="transactionType" value="Expense">
+                                    <input type="radio" id="expense" name="transactionType" value="Expense" checked>
                                     <label for="expense">Expense</label>
                                 </div>
                                 <div class="radio-item">
@@ -54,19 +54,19 @@
 
                         <div class="input-group" id="subcategoryGroup">
                             <label for="categories">Choose Category</label>
-                            <select name="categories" id="categories">
-                                {% for item in category.expense %}
+                            <select name="categories" id="categories" required>
+                                {% for item in category.expense[1:] %}
                                     <option value="{{item}}">{{item}}</option>
                                 {% endfor %}
                             </select>
                             <!-- Hidden selects for JS -->
-                            <select id="expenseOptions" style="display:none;">
-                                {% for item in category.expense %}
+                            <select id="expenseOptions" style="display:none;" required>
+                                {% for item in category.expense[1:] %}
                                     <option value="{{item}}">{{item}}</option>
                                 {% endfor %}
                             </select>
-                            <select id="incomeOptions" style="display:none;">
-                                {% for item in category.income %}
+                            <select id="incomeOptions" style="display:none;" required>
+                                {% for item in category.income[1:] %}
                                     <option value="{{item}}">{{item}}</option>
                                 {% endfor %}
                             </select>
@@ -74,10 +74,9 @@
 
                         <div class="input-group">
                             <label for="description">Description</label>
-                            <textarea id="description" placeholder="Optional description..." rows="3"></textarea>
+                            <textarea name="description" id="description" placeholder="Optional description..." rows="3"></textarea>
                         </div>
-
-                        <button type="submit" class="submit-btn">Add Transaction</button>
+                            <button type="submit" class="submit-btn">Add Transaction</button>
                     </form>
                 </div>
             </div>
@@ -125,7 +124,7 @@
                             
                             <div class="input-group">
                                 <button type="submit" class="submit-btn">Filter</button>
-                                <a class="show-button" href="{{url_for('home')}}">Show All</a>
+                                <a class="show-button" href="{{url_for('home')}}">🔃</a>
                             </div>
                         </form>
                     </div>
@@ -133,11 +132,15 @@
                     <!-- Transaction List -->
                     <div class="transaction-list" id="transactionList">
                         <!-- Sample transactions -->
-                         {% for item in history %}
+                         {% for item in history[::-1] %}
                             <div class="transaction-item expense">
                                 <div class="transaction-info">
                                     <h4>{{item[3]}}</h4>
-                                    <p>{{item[4]}}</p>
+                                    {% if item[4] %}
+                                        <p>{{item[4]}}</p>
+                                    {% else %}
+                                        <p>No Description</p>
+                                    {% endif %}
                                     {% if item[1] == 'Expense' %}
                                         <span class="transaction-type" style="color: #ef4444;">expense</span>
                                     {% elif item[1] == 'Income' %}
@@ -150,23 +153,15 @@
                                     {% elif item[1] == 'Income' %}
                                         <div class="amount"  style="color: #22c55e;">+₹{{item[2]}}</div>
                                     {% endif %}
-                                    <div class="date">{{item[5]}}/div>
+                                    <div class="date">{{item[5]}}</div>
+                                    <a class="delete" href="{{url_for('delete',id=item[0])}}">🗑️</a>
                                 </div>
                             </div>
                          {% endfor %}
-                        
-                    </div>
                 </div>
             </div>
         </div> 
-
-        <!-- Notification -->
-        <div class="notification" id="notification">
-            <div class="notification-content">
-                <span class="notification-icon">✓</span>
-                <span class="notification-message">Transaction successful!</span>
-            </div>
-        </div>
+        
     </div>
     <script src="{{url_for('static',filename='main.js')}}"></script>
 </body>

@@ -12,29 +12,26 @@ incomeCategory = [None,'Salary','Awards','Coupons','Grants','Rental']
 def inject_global():
     return {'date': todaysDate}
 
-@app.route("/", methods=["GET","POST"])
+@app.route("/", methods=["GET", "POST"])
 def home():
     database = Database()
-    error = None
+    
     if request.method == "POST":
-        try:
-            amount = float(request.form.get("amount"))
-        except ValueError:
-            error = "Only Numbers are valid"
+        amount = float(request.form.get("amount"))
         transaction_type = request.form.get("transactionType")
         category = request.form.get("categories")
-        if category == "None":
-            error = "Choose a category"
-        description = request.form.get("description")
-        if error == None:
-            database.addData(transaction_type,amount,category,description,todaysDate)
-            return redirect(url_for('home'))
-            
-    return render_template('index.html',
-                           category = {'expense': expenseCategory,'income':incomeCategory},
-                           history=database.fetchData(),
-                           amount = database.getAmount(),
-                           error = error)
+        description = request.form.get("description") 
+        if not description:
+            description = "No Description"
+        
+        database.addData(transaction_type, amount, category, description.capitalize(), todaysDate)
+
+    return render_template(
+        'index.html',
+        category={'expense': expenseCategory, 'income': incomeCategory},
+        history=database.fetchData(),
+        amount=database.getAmount(),
+    )
 
 @app.route('/filter', methods=["POST"])
 def filter():
@@ -62,7 +59,7 @@ def filter():
     
     return render_template(
         'index.html',
-        category={'expense': expenseCategory, 'income': incomeCategory},
+        category={'expense':expenseCategory, 'income':incomeCategory},
         history=filtered_history,
         amount=database.getAmount(),
         error=error
