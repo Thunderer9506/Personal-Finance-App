@@ -80,25 +80,3 @@ function loadTheme() {
         themeToggle.textContent = '🌙';
     }
 }
-
-// Show notification
-function showNotification(message, isSuccess = true) {
-    const notification = document.getElementById('notification');
-    const messageElement = notification.querySelector('.notification-message');
-    const iconElement = notification.querySelector('.notification-icon');
-    
-    messageElement.textContent = message;
-    iconElement.textContent = isSuccess ? '✓' : '✗';
-    
-    if (isSuccess) {
-        notification.classList.remove('error');
-    } else {
-        notification.classList.add('error');
-    }
-    
-    notification.classList.add('show');
-    
-    setTimeout(() => {
-        notification.classList.remove('show');
-    }, 3000);
-}

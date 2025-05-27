@@ -36,7 +36,6 @@ def home():
 @app.route('/filter', methods=["POST"])
 def filter():
     database = Database()
-    error = None
     filter_type = request.form.get("filterType")
     filter_category = request.form.get("filterCategories")
     filter_date = request.form.get("date")
@@ -62,7 +61,6 @@ def filter():
         category={'expense':expenseCategory, 'income':incomeCategory},
         history=filtered_history,
         amount=database.getAmount(),
-        error=error
     )
 
 @app.route('/delete/<int:id>')
