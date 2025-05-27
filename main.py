@@ -17,13 +17,19 @@ def home():
     database = Database()
     error = None
     if request.method == "POST":
-        amount = request.form.get("amount")
+        try:
+            amount = float(request.form.get("amount"))
+        except ValueError:
+            error = "Only Numbers are valid"
         transaction_type = request.form.get("transactionType")
         category = request.form.get("categories")
+        if category == "None":
+            error = "Choose a category"
         description = request.form.get("description")
-        
-        database.addData(transaction_type,float(amount),category,description,todaysDate)
-        return redirect('/')
+        if error == None:
+            database.addData(transaction_type,amount,category,description,todaysDate)
+            return redirect(url_for('home'))
+            
     return render_template('index.html',
                            category = {'expense': expenseCategory,'income':incomeCategory},
                            history=database.fetchData(),
@@ -37,8 +43,7 @@ def filter():
     filter_type = request.form.get("filterType")
     filter_category = request.form.get("filterCategories")
     filter_date = request.form.get("date")
-    print(filter_type,filter_category,filter_date)
-    # Only pass non-empty filters
+    
     filters = {}
     if filter_type:
         filters['type'] = filter_type
@@ -53,9 +58,8 @@ def filter():
     else:
         filters['date'] = None
 
-    # print(database.filterData())
     filtered_history = database.filterData(filters['type'],filters['category'],filters['date'])
-    # print(filtered_history)
+    
     return render_template(
         'index.html',
         category={'expense': expenseCategory, 'income': incomeCategory},
