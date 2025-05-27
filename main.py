@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request,redirect
+from flask import Flask,render_template,request,redirect,url_for
 from datetime import datetime
 from db import Database
 
@@ -63,3 +63,9 @@ def filter():
         amount=database.getAmount(),
         error=error
     )
+
+@app.route('/delete/<int:id>')
+def delete(id):
+    datebase = Database()
+    datebase.deleteData(id)
+    return redirect(url_for('home'))
