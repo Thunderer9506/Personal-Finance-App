@@ -105,7 +105,7 @@ The **Personal Finance App** is a web-based application designed to help users m
 ### 1. **Clone the Repository**
 
 ```sh
-git clone https://github.com/Thunderer9506/personal-finance-app.git
+git clone https://github.com/Thunderer9506/Personal-Finance-App.git
 cd personal-finance-app
 ```
 
