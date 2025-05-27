@@ -52,7 +52,7 @@
     </form>
 
     <h3>Transaction History</h3>
-    <form action="/filter" method="post">
+    <form action="{{url_for('filter')}}" method="post">
         <!-- Filter Section -->
         <label for="filterType">Choose Type</label>
         <select name="filterType" id="filterType">
@@ -80,7 +80,7 @@
         <input type="date" name="date" id="date">
         <button type="submit">Filter</button>
     </form>
-    <form action="/" method="get">
+    <form action="{{url_for('home')}}" method="get">
         <button type="submit">Show All</button>
     </form>
     <table>
@@ -105,7 +105,7 @@
                 <td>{{item[3]}}</td>
                 <td>{{item[4] | capitalize}}</td>
                 <td>{{item[5]}}</td>
-                <td><button type="button">🗑️</button></td>
+                <td><a href="{{url_for('delete',id=item[0])}}">🗑️</a></td>
             </tr>
         {% endfor %}
         
