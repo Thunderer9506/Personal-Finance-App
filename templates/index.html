@@ -27,7 +27,7 @@
                 <!-- Transaction Form -->
                 <div class="transaction-form">
                     <h3>Add Transaction</h3>
-                    <form id="transactionForm">
+                    <form action="{{url_for('home')}}" method="post">
                         <div class="form-row">
                             <div class="input-group flex-1">
                                 <label for="amount">Amount</label>
@@ -40,13 +40,13 @@
 
                         <div class="input-group">
                             <label>Category</label>
-                            <div class="checkbox-group">
-                                <div class="checkbox-item">
-                                    <input type="radio" id="expense" name="transactionType" value="Expense" onchange="handleCategoryChange(this)">
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" id="expense" name="transactionType" value="Expense">
                                     <label for="expense">Expense</label>
                                 </div>
-                                <div class="checkbox-item">
-                                    <input type="radio" id="income" name="transactionType" value="Income" onchange="handleCategoryChange(this)">
+                                <div class="radio-item">
+                                    <input type="radio" id="income" name="transactionType" value="Income">
                                     <label for="income">Income</label>
                                 </div>
                             </div>
@@ -90,50 +90,75 @@
                     
                     <!-- Filters -->
                     <div class="filters">
-                        <div class="input-group">
-                            <label for="filterType">Filter by Type</label>
-                            <select id="filterType" onchange="filterTransactions()">
-                                <option value="all">All Transactions</option>
-                                <option value="expense">Expenses</option>
-                                <option value="income">incomes</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label for="searchInput">Search</label>
-                            <input type="text" id="searchInput" placeholder="Search transactions..." oninput="filterTransactions()">
-                        </div>
+                        <form class="filter-form" action="{{url_for('filter')}}" method="post">
+                            <div class="input-group">
+                                <div class="type">
+                                    <label for="filterType">Filter by Type</label>
+                                    <select name="filterType" id="filterType">
+                                        <option value="Expense">Expenses</option>
+                                        <option value="Income">Incomes</option>
+                                    </select>
+                                </div>
+                                <div class="category">
+                                    <label for="filterCategories">Choose Category</label>
+                                    <select name="filterCategories" id="filterCategories">
+                                        {% for item in category.expense %}
+                                            <option value="{{item}}">{{item}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <select id="filterExpenseOptions" style="display:none;">
+                                        {% for item in category.expense %}
+                                            <option value="{{item}}">{{item}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <select id="filterIncomeOptions" style="display:none;">
+                                        {% for item in category.income %}
+                                            <option value="{{item}}">{{item}}</option>
+                                        {% endfor %}
+                                    </select>   
+                                </div>
+                                <div class="filterDate">
+                                    <label for="date">Date</label>
+                                    <input type="date" name="date" id="date">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <button type="submit" class="submit-btn">Filter</button>
+                                <a class="show-button" href="{{url_for('home')}}">Show All</a>
+                            </div>
+                        </form>
                     </div>
 
                     <!-- Transaction List -->
                     <div class="transaction-list" id="transactionList">
                         <!-- Sample transactions -->
-                        <div class="transaction-item expense">
-                            <div class="transaction-info">
-                                <h4>Food & Dining</h4>
-                                <p>Lunch at restaurant</p>
-                                <span class="transaction-type">expense</span>
+                         {% for item in history %}
+                            <div class="transaction-item expense">
+                                <div class="transaction-info">
+                                    <h4>{{item[3]}}</h4>
+                                    <p>{{item[4]}}</p>
+                                    {% if item[1] == 'Expense' %}
+                                        <span class="transaction-type" style="color: #ef4444;">expense</span>
+                                    {% elif item[1] == 'Income' %}
+                                        <span class="transaction-type" style="color: #22c55e;">income</span>
+                                    {% endif %}
+                                </div>
+                                <div class="transaction-amount">
+                                    {% if item[1] == 'Expense' %}
+                                        <div class="amount"  style="color: #ef4444;">-₹{{item[2]}}</div>
+                                    {% elif item[1] == 'Income' %}
+                                        <div class="amount"  style="color: #22c55e;">+₹{{item[2]}}</div>
+                                    {% endif %}
+                                    <div class="date">{{item[5]}}/div>
+                                </div>
                             </div>
-                            <div class="transaction-amount">
-                                <div class="amount">-$50.00</div>
-                                <div class="date">2025-05-25</div>
-                            </div>
-                        </div>
-
-                        <div class="transaction-item income">
-                            <div class="transaction-info">
-                                <h4>Emergency Fund</h4>
-                                <p>Monthly emergency fund contribution</p>
-                                <span class="transaction-type">income</span>
-                            </div>
-                            <div class="transaction-amount">
-                                <div class="amount">+$500.00</div>
-                                <div class="date">2025-05-24</div>
-                            </div>
-                        </div>
+                         {% endfor %}
+                        
                     </div>
                 </div>
             </div>
-        </div>
+        </div> 
 
         <!-- Notification -->
         <div class="notification" id="notification">
@@ -143,109 +168,6 @@
             </div>
         </div>
     </div>
-    <!-- ...existing code... -->
-    {% if error %}
-        <p style="color:red;">{{ error }}</p>
-    {% endif %}
-    <!-- ...existing code... -->
-    <h3>Current Balance</h3>
-    <h1>{{amount}}</h1>
-    <form method="post">
-        <label for="amount">Enter: </label>
-        <input type="text" id="amount" name="amount" placeholder="0.00" required >
-        <span class="date">{{date}}</span>
-        <br>
-        <p>Choose the Category</p>
-        <input type="radio" name="transactionType" id="expense" value="Expense" checked required>
-        <label for="expense">Expense</label>
-        <input type="radio" name="transactionType" id="income" value="Income" required>
-        <label for="income">Income</label>
-        <br>
-        <br>
-        <label for="categories">Choose Category</label>
-        <select name="categories" id="categories">
-            {% for item in category.expense %}
-                <option value="{{item}}">{{item}}</option>
-            {% endfor %}
-        </select>
-        <!-- Hidden selects for JS -->
-        <select id="expenseOptions" style="display:none;">
-            {% for item in category.expense %}
-                <option value="{{item}}">{{item}}</option>
-            {% endfor %}
-        </select>
-        <select id="incomeOptions" style="display:none;">
-            {% for item in category.income %}
-                <option value="{{item}}">{{item}}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <br>
-        <label for="description">Write Desciption</label><br>
-        <textarea name="description" id="description" cols="30" rows="10" placeholder="Reason for transaction"></textarea>
-        <br>
-        <button type="submit">Add Transaction</button>
-    </form>
-
-    <h3>Transaction History</h3>
-    <form action="{{url_for('filter')}}" method="post">
-        <!-- Filter Section -->
-        <label for="filterType">Choose Type</label>
-        <select name="filterType" id="filterType">
-            <option value="Expense">Expense</option>
-            <option value="Income">Income</option>
-        </select>
-        <label for="filterCategories">Choose Category</label>
-        <select name="filterCategories" id="filterCategories">
-            {% for item in category.expense %}
-                <option value="{{item}}">{{item}}</option>
-            {% endfor %}
-        </select>
-        <!-- Hidden selects for JS -->
-        <select id="filterExpenseOptions" style="display:none;">
-            {% for item in category.expense %}
-                <option value="{{item}}">{{item}}</option>
-            {% endfor %}
-        </select>
-        <select id="filterIncomeOptions" style="display:none;">
-            {% for item in category.income %}
-                <option value="{{item}}">{{item}}</option>
-            {% endfor %}
-        </select>
-
-        <input type="date" name="date" id="date">
-        <button type="submit">Filter</button>
-    </form>
-    <form action="{{url_for('home')}}" method="get">
-        <button type="submit">Show All</button>
-    </form>
-    <table>
-        <tr>
-            <th>Id</th>
-            <th>Type</th>
-            <th>Amount</th>
-            <th>Category</th>
-            <th>Description</th>
-            <th>Date</th>
-        </tr>
-        {% for item in history %}
-            <tr>
-                <td>{{item[0]}}</td>
-                <td>{{item[1]}}</td>
-                {% if item[1] == "Expense" %}
-                    <td style="color: red;">{{item[2]}}</td>
-                {% elif item[1] == "Income" %}
-                    <td style="color: green;">{{item[2]}}</td>
-                {% endif %}
-                
-                <td>{{item[3]}}</td>
-                <td>{{item[4] | capitalize}}</td>
-                <td>{{item[5]}}</td>
-                <td><a href="{{url_for('delete',id=item[0])}}">🗑️</a></td>
-            </tr>
-        {% endfor %}
-        
-    </table>
     <script src="{{url_for('static',filename='main.js')}}"></script>
 </body>
 </html>
