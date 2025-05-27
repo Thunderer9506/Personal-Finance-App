@@ -12,9 +12,6 @@ class Database:
         except sqlite3.Error as e:
             print(f"Error connecting to the database: {e}")
 
-    def closeConnection(self):
-        self.connection.close()
-
     def createTable(self):
         query = '''
                 CREATE TABLE IF NOT EXISTS finance (
@@ -29,7 +26,7 @@ class Database:
         self.cursor.execute(query)
         self.connection.commit()
         print("Table Created Successfully")
-        # self.closeConnection()
+        return
 
     def addData(self,type:str,amount:float,category:str,description:str,date:str):
         query = "INSERT INTO finance (ID, TYPE, AMOUNT, CATEGORY, DESCRIPTION, DATE) VALUES (?, ?, ?, ?, ?, ?)"
@@ -37,7 +34,7 @@ class Database:
         self.cursor.execute(query, (self.getMaxId() + 1, type, amount, category, description, date))
         self.connection.commit()
         print("New row added Successfully")
-        # self.closeConnection()
+        return
 
     def deleteData(self,id):
         self.cursor.execute("DELETE FROM finance WHERE ID = ?",(id,))
@@ -54,7 +51,7 @@ class Database:
                 sum -= i[2]
             elif i[1] == "Income":
                 sum += i[2]
-        # self.closeConnection()
+
         return sum
     
     def filterData(self, type=None, category=None, date=None):
@@ -70,21 +67,20 @@ class Database:
             query += " AND DATE = ?"
             params.append(date)
         self.cursor.execute(query, params)
-        # data = self.fetchData()
-        # self.closeConnection()
+
         return self.cursor.fetchall()
     
     def fetchData(self):
         self.cursor.execute("SELECT * FROM finance")
         data = self.cursor.fetchall()
-        # self.closeConnection()
         return data
+    
     def getMaxId(self):
         self.cursor.execute("SELECT MAX(ID) FROM finance")
         result = self.cursor.fetchone()
         return result[0] if result and result[0] is not None else 0
 
-dbs1 = Database()
+# dbs1 = Database()
 
 # dbs1.createTable()
 # print(dbs1.fetchData())
