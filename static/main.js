@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
+    loadTheme()
     const expenseRadio = document.getElementById('expense');
     const incomeRadio = document.getElementById('income');
     const categories = document.getElementById('categories');
@@ -52,3 +53,53 @@ document.addEventListener('DOMContentLoaded', function() {
         updateFilterCategories(filterIncomeOptions);
     }
 });
+
+function toggleTheme() {
+    const body = document.body;
+    const themeToggle = document.querySelector('.theme-toggle');
+    
+    if (body.getAttribute('data-theme') === 'light') {
+        body.removeAttribute('data-theme');
+        themeToggle.textContent = '🌙';
+        localStorage.setItem('theme', 'dark');
+    } else {
+        body.setAttribute('data-theme', 'light');
+        themeToggle.textContent = '☀️';
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+// Load saved theme
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const themeToggle = document.querySelector('.theme-toggle');
+    
+    if (savedTheme === 'light') {
+        document.body.setAttribute('data-theme', 'light');
+        themeToggle.textContent = '☀️';
+    } else {
+        themeToggle.textContent = '🌙';
+    }
+}
+
+// Show notification
+function showNotification(message, isSuccess = true) {
+    const notification = document.getElementById('notification');
+    const messageElement = notification.querySelector('.notification-message');
+    const iconElement = notification.querySelector('.notification-icon');
+    
+    messageElement.textContent = message;
+    iconElement.textContent = isSuccess ? '✓' : '✗';
+    
+    if (isSuccess) {
+        notification.classList.remove('error');
+    } else {
+        notification.classList.add('error');
+    }
+    
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}

@@ -7,6 +7,142 @@
     <link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
 </head>
 <body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Personal Finance</h1>
+            <p>Track your expenses and incomes</p>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        </header>
+
+        <div class="main-content">
+            <!-- Left Section -->
+            <div class="left-section">
+                <!-- Balance Card -->
+                <div class="balance-card">
+                    <h2>Current Balance</h2>
+                    <div class="balance-amount">₹ {{amount}}</div>
+                </div>
+
+                <!-- Transaction Form -->
+                <div class="transaction-form">
+                    <h3>Add Transaction</h3>
+                    <form id="transactionForm">
+                        <div class="form-row">
+                            <div class="input-group flex-1">
+                                <label for="amount">Amount</label>
+                                <input type="number" id="amount" name="amount" placeholder="0.00" required >
+                            </div>
+                            <div class="date-display">
+                                <span id="currentDate">{{date}}</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Category</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="radio" id="expense" name="transactionType" value="Expense" onchange="handleCategoryChange(this)">
+                                    <label for="expense">Expense</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="radio" id="income" name="transactionType" value="Income" onchange="handleCategoryChange(this)">
+                                    <label for="income">Income</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group" id="subcategoryGroup">
+                            <label for="categories">Choose Category</label>
+                            <select name="categories" id="categories">
+                                {% for item in category.expense %}
+                                    <option value="{{item}}">{{item}}</option>
+                                {% endfor %}
+                            </select>
+                            <!-- Hidden selects for JS -->
+                            <select id="expenseOptions" style="display:none;">
+                                {% for item in category.expense %}
+                                    <option value="{{item}}">{{item}}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="incomeOptions" style="display:none;">
+                                {% for item in category.income %}
+                                    <option value="{{item}}">{{item}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" placeholder="Optional description..." rows="3"></textarea>
+                        </div>
+
+                        <button type="submit" class="submit-btn">Add Transaction</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Section -->
+            <div class="right-section">
+                <!-- Transaction History -->
+                <div class="transaction-history">
+                    <h3>Transaction History</h3>
+                    
+                    <!-- Filters -->
+                    <div class="filters">
+                        <div class="input-group">
+                            <label for="filterType">Filter by Type</label>
+                            <select id="filterType" onchange="filterTransactions()">
+                                <option value="all">All Transactions</option>
+                                <option value="expense">Expenses</option>
+                                <option value="income">incomes</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="searchInput">Search</label>
+                            <input type="text" id="searchInput" placeholder="Search transactions..." oninput="filterTransactions()">
+                        </div>
+                    </div>
+
+                    <!-- Transaction List -->
+                    <div class="transaction-list" id="transactionList">
+                        <!-- Sample transactions -->
+                        <div class="transaction-item expense">
+                            <div class="transaction-info">
+                                <h4>Food & Dining</h4>
+                                <p>Lunch at restaurant</p>
+                                <span class="transaction-type">expense</span>
+                            </div>
+                            <div class="transaction-amount">
+                                <div class="amount">-$50.00</div>
+                                <div class="date">2025-05-25</div>
+                            </div>
+                        </div>
+
+                        <div class="transaction-item income">
+                            <div class="transaction-info">
+                                <h4>Emergency Fund</h4>
+                                <p>Monthly emergency fund contribution</p>
+                                <span class="transaction-type">income</span>
+                            </div>
+                            <div class="transaction-amount">
+                                <div class="amount">+$500.00</div>
+                                <div class="date">2025-05-24</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification -->
+        <div class="notification" id="notification">
+            <div class="notification-content">
+                <span class="notification-icon">✓</span>
+                <span class="notification-message">Transaction successful!</span>
+            </div>
+        </div>
+    </div>
     <!-- ...existing code... -->
     {% if error %}
         <p style="color:red;">{{ error }}</p>
