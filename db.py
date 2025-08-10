@@ -1,12 +1,16 @@
 import sqlite3
+import sqlitecloud
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 class Database:
     def __init__(self):
         self.connection = None  # Placeholder for the connection
         self.cursor = None      # Placeholder for the cursor
-
         try:
-            self.connection = sqlite3.connect('finance.db')
+            self.connection = sqlitecloud.connect(os.getenv('SQLITE_URI'))
             self.cursor = self.connection.cursor()
             print("Successfully connected to the database!")
         except sqlite3.Error as e:
@@ -73,6 +77,7 @@ class Database:
     def fetchData(self):
         self.cursor.execute("SELECT * FROM finance")
         data = self.cursor.fetchall()
+        print(data)
         return data
     
     def getMaxId(self):
