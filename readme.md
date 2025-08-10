@@ -10,6 +10,8 @@
 
 The **Personal Finance App** is a web-based application designed to help users manage their finances by tracking expenses and incomes. With a clean UI, dark/light theme toggle, and powerful filtering, you can easily monitor your financial health and keep your spending in check.
 
+- [Personal Finance](Personal-Finance-App.onrender.com)
+
 ---
 
 ## 🚀 Features
@@ -147,7 +149,7 @@ python main.py
 
 ## 📝 Credits
 
-- Built with [Flask](https://flask.palletsprojects.com/) and [SQLite](https://www.sqlite.org/).
+- Built with [Flask](https://flask.palletsprojects.com/) and [SQLitecloud](https://www.sqlitecloud.org/).
 - UI inspired by modern finance dashboards.
 
 ---
