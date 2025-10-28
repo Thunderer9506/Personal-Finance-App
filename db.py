@@ -2,7 +2,7 @@ import sqlite3
 import sqlitecloud
 from dotenv import load_dotenv
 import os
-
+# SQLITE_URI = "sqlitecloud://ckdbnd5lnk.g5.sqlite.cloud:8860/finance.db?apikey=ht4nCXVpeJXUiV6pEjoxTccjCFVloFm8fBOuYaoebxc"
 load_dotenv()
 
 class Database:
@@ -10,7 +10,7 @@ class Database:
         self.connection = None  # Placeholder for the connection
         self.cursor = None      # Placeholder for the cursor
         try:
-            self.connection = sqlitecloud.connect(os.getenv('SQLITE_URI'))
+            self.connection = sqlite3.connect("finance.db")
             self.cursor = self.connection.cursor()
             print("Successfully connected to the database!")
         except sqlite3.Error as e:
