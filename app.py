@@ -24,7 +24,7 @@ def home():
         if not description:
             description = "No Description"
         
-        database.addData(transaction_type, amount, category, description.capitalize(), todaysDate)
+        database.addFinance(transaction_type, amount, category, description.capitalize(), todaysDate)
 
     return render_template(
         'index.html',
@@ -66,5 +66,8 @@ def filter():
 @app.route('/delete/<int:id>')
 def delete(id):
     datebase = Database()
-    datebase.deleteData(id)
+    datebase.deleteFinance(id)
     return redirect(url_for('home'))
+
+if __name__ == "__main__":
+    app.run(debug=True)
