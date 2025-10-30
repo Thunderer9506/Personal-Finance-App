@@ -27,7 +27,7 @@
                 <!-- Transaction Form -->
                 <div class="transaction-form">
                     <h3>Add Transaction</h3>
-                    <form action="{{url_for('home')}}" method="post">
+                    <form action="{{url_for('home',userId = userId)}}" method="post">
                         <div class="form-row">
                             <div class="input-group flex-1">
                                 <label for="amount">Amount</label>
@@ -89,7 +89,7 @@
                     
                     <!-- Filters -->
                     <div class="filters">
-                        <form class="filter-form" action="{{url_for('filter')}}" method="post">
+                        <form class="filter-form" action="{{url_for('filter',userId = userId)}}" method="post">
                             <div class="input-group">
                                 <div class="type">
                                     <label for="filterType">Filter by Type</label>
@@ -124,7 +124,7 @@
                             
                             <div class="input-group">
                                 <button type="submit" class="submit-btn">Filter</button>
-                                <a class="show-button" href="{{url_for('home')}}">🔃</a>
+                                <a class="show-button" href="{{url_for('home',userId = userId)}}">🔃</a>
                             </div>
                         </form>
                     </div>
@@ -135,26 +135,26 @@
                          {% for item in history[::-1] %}
                             <div class="transaction-item expense">
                                 <div class="transaction-info">
-                                    <h4>{{item[3]}}</h4>
-                                    {% if item[4] %}
-                                        <p>{{item[4]}}</p>
+                                    <h4>{{item[4]}}</h4>
+                                    {% if item[5] %}
+                                        <p>{{item[5]}}</p>
                                     {% else %}
                                         <p>No Description</p>
                                     {% endif %}
-                                    {% if item[1] == 'Expense' %}
+                                    {% if item[2] == 'Expense' %}
                                         <span class="transaction-type" style="color: #ef4444;">expense</span>
-                                    {% elif item[1] == 'Income' %}
+                                    {% elif item[2] == 'Income' %}
                                         <span class="transaction-type" style="color: #22c55e;">income</span>
                                     {% endif %}
                                 </div>
                                 <div class="transaction-amount">
-                                    {% if item[1] == 'Expense' %}
-                                        <div class="amount"  style="color: #ef4444;">-₹{{item[2]}}</div>
-                                    {% elif item[1] == 'Income' %}
-                                        <div class="amount"  style="color: #22c55e;">+₹{{item[2]}}</div>
+                                    {% if item[2] == 'Expense' %}
+                                        <div class="amount"  style="color: #ef4444;">-₹{{item[3]}}</div>
+                                    {% elif item[2] == 'Income' %}
+                                        <div class="amount"  style="color: #22c55e;">+₹{{item[3]}}</div>
                                     {% endif %}
-                                    <div class="date">{{item[5]}}</div>
-                                    <a class="delete" href="{{url_for('delete',id=item[0])}}">🗑️</a>
+                                    <div class="date">{{item[6]}}</div>
+                                    <a class="delete" href="{{url_for('delete',uId = userId,fid=item[0])}}">🗑️</a>
                                 </div>
                             </div>
                          {% endfor %}
