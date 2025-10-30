@@ -2,7 +2,6 @@ import sqlite3
 import sqlitecloud
 from dotenv import load_dotenv
 import os
-# SQLITE_URI = "sqlitecloud://ckdbnd5lnk.g5.sqlite.cloud:8860/finance.db?apikey=ht4nCXVpeJXUiV6pEjoxTccjCFVloFm8fBOuYaoebxc"
 load_dotenv()
 
 class Database:
@@ -10,57 +9,88 @@ class Database:
         self.connection = None  # Placeholder for the connection
         self.cursor = None      # Placeholder for the cursor
         try:
-            self.connection = sqlite3.connect("finance.db")
+            self.connection = sqlitecloud.connect(os.getenv('SQLITE_URI'))
             self.cursor = self.connection.cursor()
             print("Successfully connected to the database!")
         except sqlite3.Error as e:
             print(f"Error connecting to the database: {e}")
 
     def createTable(self):
-        query = '''
-                CREATE TABLE IF NOT EXISTS finance (
+        transaction = '''
+                CREATE TABLE IF NOT EXISTS Finances (
                     ID INTEGER PRIMARY KEY NOT NULL,
+                    USER_ID INTEGER NOT NULL,
                     TYPE TEXT NOT NULL,
                     AMOUNT REAL NOT NULL,
                     CATEGORY TEXT NOT NULL,
                     DESCRIPTION TEXT,
-                    DATE TEXT
+                    DATE TEXT,
+                    FOREIGN KEY (USER_ID) REFERENCES Users(ID)
                 )
                 '''
-        self.cursor.execute(query)
+        users = '''
+                CREATE TABLE IF NOT EXISTS Users (
+                    ID INTEGER PRIMARY KEY NOT NULL,
+                    FULL_NAME TEXT NOT NULL,
+                    PHONE_NUMBER INTEGER NOT NULL UNIQUE
+                )
+                '''
+        self.cursor.execute(transaction)
         self.connection.commit()
-        print("Table Created Successfully")
+        self.cursor.execute(users)
+        self.connection.commit()
+        print("Tables Created Successfully")
         return
+    def insert_newUser(self,name:str, phone:int):
+        query = "INSERT INTO Users (ID, FULL_NAME, PHONE_NUMBER) VALUES (?, ?, ?)"
+        maxId = self.getMaxId_Users() + 1
+        self.cursor.execute(query,(maxId, name.title(), phone,))
+        self.connection.commit()
+        fakeData = [
+            ('Income', 75000.00, 'Salary', 'Monthly salary credited', '2025-10-01'),
+            ('Expense', 1200.00, 'Food', 'Dinner at restaurant', '2025-10-03'),
+            ('Expense', 5000.00, 'Rent', 'Shared apartment rent', '2025-10-05'),
+            ('Expense', 800.00, 'Transport', 'Cab rides and metro', '2025-10-07'),
+            ('Income', 1500.00, 'Freelance', 'Website design project', '2025-10-10'),
+        ]
+        for i in fakeData:
+            self.insert_newFinance(maxId,i[0],i[1],i[2],i[3],i[4])
+        print("New User Added Successfully of Id {}".format(maxId))
+        return maxId
+    
+    def find_user(self,name,phone):
+        query = "SELECT * FROM Users WHERE FULL_NAME = ? AND PHONE_NUMBER = ?"
+        self.cursor.execute(query,(name.title(),phone))
+        print("Finded user {}".format(name))
+        return self.cursor.fetchone()[0]
 
-    def addData(self,type:str,amount:float,category:str,description:str,date:str):
-        query = "INSERT INTO finance (ID, TYPE, AMOUNT, CATEGORY, DESCRIPTION, DATE) VALUES (?, ?, ?, ?, ?, ?)"
-        
-        self.cursor.execute(query, (self.getMaxId() + 1, type, amount, category, description, date))
+    def insert_newFinance(self,userId:int,type:str,amount:float,category:str,description:str,date:str):
+        query = "INSERT INTO Finances (ID, USER_ID, TYPE, AMOUNT, CATEGORY, DESCRIPTION, DATE) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        self.cursor.execute(query, (self.getMaxId_Finances() + 1, userId, type, amount, category, description, date))
         self.connection.commit()
         print("New row added Successfully")
         return
 
-    def deleteData(self,id):
-        self.cursor.execute("DELETE FROM finance WHERE ID = ?",(id,))
+    def deleteFinance(self,userId,financeId):
+        self.cursor.execute("DELETE FROM Finances WHERE USER_ID = ? AND ID = ?",(userId,financeId,))
         self.connection.commit()
-        print(f"Deleted rows with ID = {id}")
+        print(f"Deleted rows with ID = {financeId} of User_Id = {userId}")
         return
     
-    def getAmount(self):
-        self.cursor.execute("SELECT * FROM finance")
+    def getAmount(self,userId:int):
+        self.cursor.execute("SELECT AMOUNT, TYPE FROM Finances WHERE USER_ID = ?",(userId,))
         data = self.cursor.fetchall()
         sum = 0
-        for i in data:
-            if i[1] == "Expense":
-                sum -= i[2]
-            elif i[1] == "Income":
-                sum += i[2]
-
+        for amt,type in data:
+            if type == "Expense":
+                sum -= amt
+            elif type == "Income":
+                sum += amt
         return sum
     
-    def filterData(self, type=None, category=None, date=None):
-        query = "SELECT * FROM finance WHERE 1=1"
-        params = []
+    def filterData(self, userId, type=None, category=None, date=None):
+        query = "SELECT * FROM Finances WHERE 1=1 AND USER_ID = ?"
+        params = [userId]
         if type:
             query += " AND TYPE = ?"
             params.append(type)
@@ -71,44 +101,61 @@ class Database:
             query += " AND DATE = ?"
             params.append(date)
         self.cursor.execute(query, params)
-
         return self.cursor.fetchall()
     
-    def fetchData(self):
-        self.cursor.execute("SELECT * FROM finance")
-        data = self.cursor.fetchall()
-        print(data)
-        return data
+    def fetchData_finance(self,userId):
+        self.cursor.execute("SELECT * FROM Finances WHERE USER_ID = ?",(userId,))
+        return self.cursor.fetchall()
     
-    def getMaxId(self):
-        self.cursor.execute("SELECT MAX(ID) FROM finance")
+    def fetchData_user(self):
+        self.cursor.execute("SELECT * FROM Users")
+        return self.cursor.fetchall()
+    
+    def getMaxId_Finances(self):
+        self.cursor.execute("SELECT MAX(ID) FROM Finances")
         result = self.cursor.fetchone()
         return result[0] if result and result[0] is not None else 0
+    
+    def getMaxId_Users(self):
+        self.cursor.execute("SELECT MAX(ID) FROM Users")
+        result = self.cursor.fetchone()
+        return result[0] if result and result[0] is not None else 0
+    def close(self):
+        if self.connection:
+            self.connection.close()
+            self.connection = None
+            self.cursor = None
+            print("Connection Closed")
 
-# dbs1 = Database()
 
-# dbs1.createTable()
-# print(dbs1.fetchData())
-# dbs1.createTable()
-# dbs1.addData("Expense", 1200.00, "Food", "Lunch at restaurant", "2025-05-20")
-# dbs1.addData("Income", 5000.00, "Salary", "Monthly salary", "2025-05-21")
-# dbs1.addData("Expense", 300.00, "Transportation", "Bus fare", "2025-05-22")
-# dbs1.addData("Expense", 800.00, "Bill", "Electricity bill", "2025-05-23")
-# dbs1.addData("Income", 200.00, "Awards", "Quiz competition", "2025-05-24")
-# dbs1.addData("Expense", 150.00, "Shoping", "Bought a book", "2025-05-24")
-# dbs1.addData("Income", 1000.00, "Rental", "House rent received", "2025-05-25")
-# dbs1.addData("Expense", 400.00, "Education", "Online course", "2025-05-25")
-# print(dbs1.getAmount())
-# # Get all expenses
-# expenses = dbs1.filterData(type="Expense")
-# print(expenses)
+# if __name__ == "__main__":
+    # db = Database()
+    # db.createTable()
+    # data = [(1, 'Aarav Mehta', 9876543210),
+    #         (2, 'Priya Sharma', 9123456789),
+    #         (3, 'Rohan Iyer', 9988776655)]
+    # for i in data:
+    #     db.insert_newUser(i[1],i[2])
 
-# # Get all income in "Salary" category
-# salary_income = dbs1.filterData(type="Income", category="Salary")
-# print(salary_income)
-
-# # Get all transactions on a specific date
-# on_date = dbs1.filterData(date="21-05-2025")
-# print(on_date)
-
-# dbs1.deleteData(3)
+    # data = [
+    #         (1, 1, 'Income', 75000.00, 'Salary', 'Monthly salary credited', '2025-10-01'),
+    #         (2, 1, 'Expense', 1200.00, 'Food', 'Dinner at restaurant', '2025-10-03'),
+    #         (3, 1, 'Expense', 5000.00, 'Rent', 'Shared apartment rent', '2025-10-05'),
+    #         (4, 1, 'Expense', 800.00, 'Transport', 'Cab rides and metro', '2025-10-07'),
+    #         (5, 1, 'Income', 1500.00, 'Freelance', 'Website design project', '2025-10-10'),
+    #         (6, 2, 'Income', 68000.00, 'Salary', 'Monthly salary', '2025-10-02'),
+    #         (7, 2, 'Expense', 2200.00, 'Food', 'Groceries and snacks', '2025-10-04'),
+    #         (8, 2, 'Expense', 4500.00, 'Shopping', 'Clothes and cosmetics', '2025-10-06'),
+    #         (9, 2, 'Expense', 600.00, 'Transport', 'Office commute', '2025-10-09'),
+    #         (10, 2, 'Income', 3000.00, 'Bonus', 'Quarterly performance bonus', '2025-10-12'),
+    #         (11, 3, 'Income', 82000.00, 'Salary', 'Monthly salary payment', '2025-10-01'),
+    #         (12, 3, 'Expense', 3000.00, 'Food', 'Dining out and groceries', '2025-10-03'),
+    #         (13, 3, 'Expense', 7000.00, 'Rent', 'Apartment rent', '2025-10-05'),
+    #         (14, 3, 'Expense', 1500.00, 'Entertainment', 'Concert tickets', '2025-10-08'),
+    #         (15, 3, 'Income', 2000.00, 'Investment', 'Stock dividend payout', '2025-10-10')
+    #     ]
+    
+    # for i in data:
+    #     db.insert_newFinance(i[1],i[2],i[3],i[4],i[5],i[6])
+    
+    # db.close()
