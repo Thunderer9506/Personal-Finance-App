@@ -10,7 +10,7 @@
 
 The **Personal Finance App** is a web-based application designed to help users manage their finances by tracking expenses and incomes. With a clean UI, dark/light theme toggle, and powerful filtering, you can easily monitor your financial health and keep your spending in check.
 
-- [Personal Finance](https://personal-finance-app-c4fa.onrender.com/)
+- [Personal Finance](https://personal-finance-app-1jv5.onrender.com/)
 
 ---
 
