@@ -1,41 +1,72 @@
-from flask import Flask,render_template,request,redirect,url_for
+from flask import Flask,render_template,request,redirect,url_for,g
 from datetime import datetime
 from db import Database
 
 app = Flask(__name__)
 
 todaysDate = datetime.now().strftime("%Y-%m-%d")
-expenseCategory = [None,'Food','Transportation','Bill','Shoping','Education']
-incomeCategory = [None,'Salary','Awards','Coupons','Grants','Rental']
+expenseCategory = [None,'Food','Transportation','Bill','Shopping','Education', 'Rent', 'Entertainment', 'Investment']
+incomeCategory = [None,'Salary','Awards','Coupons','Grants','Rental', 'Freelance']
 
 @app.context_processor
 def inject_global():
     return {'date': todaysDate}
 
+def get_db():
+    if 'db' not in g:
+        g.db = Database()
+    return g.db
+
+@app.teardown_appcontext
+def close_db(exception):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
 @app.route("/", methods=["GET", "POST"])
-def home():
-    database = Database()
-    
+def login():
+    db = get_db()
+    if request.method == "POST":
+        phone = request.form.get("phone")
+        name = request.form.get('name')
+        userId = db.find_user(name,phone)
+        return redirect(url_for('home',userId = userId)) 
+    return render_template('login.html')  
+
+@app.route("/signup", methods=['GET', 'POST'])  
+def signup():
+    db = get_db()
+    if request.method == "POST":
+        phone = request.form.get("phone")
+        name = request.form.get('name')
+        uId = db.insert_newUser(name,phone)
+        return redirect(url_for('home',userId = uId)) 
+    return render_template('signup.html')  
+
+
+@app.route("/home/<int:userId>", methods=["GET", "POST"])
+def home(userId):        
+    db = get_db()                        
     if request.method == "POST":
         amount = float(request.form.get("amount"))
         transaction_type = request.form.get("transactionType")
         category = request.form.get("categories")
-        description = request.form.get("description") 
+        description = request.form.get("description")
         if not description:
             description = "No Description"
-        
-        database.addFinance(transaction_type, amount, category, description.capitalize(), todaysDate)
+        db.insert_newFinance(userId, transaction_type, amount, category, description.capitalize(), todaysDate)
 
     return render_template(
         'index.html',
         category={'expense': expenseCategory, 'income': incomeCategory},
-        history=database.fetchData(),
-        amount=database.getAmount(),
+        history=db.fetchData_finance(userId),    
+        amount=db.getAmount(userId),     
+        userId = userId
     )
 
-@app.route('/filter', methods=["POST"])
-def filter():
-    database = Database()
+@app.route('/filter/<int:userId>', methods=["POST"])
+def filter(userId):
+    db = get_db()
     filter_type = request.form.get("filterType")
     filter_category = request.form.get("filterCategories")
     filter_date = request.form.get("date")
@@ -54,20 +85,21 @@ def filter():
     else:
         filters['date'] = None
 
-    filtered_history = database.filterData(filters['type'],filters['category'],filters['date'])
+    filtered_history = db.filterData(userId,filters['type'],filters['category'],filters['date'])
     
     return render_template(
         'index.html',
         category={'expense':expenseCategory, 'income':incomeCategory},
         history=filtered_history,
-        amount=database.getAmount(),
+        amount=db.getAmount(userId),
+        userId = userId
     )
 
-@app.route('/delete/<int:id>')
-def delete(id):
-    datebase = Database()
-    datebase.deleteFinance(id)
-    return redirect(url_for('home'))
+@app.route('/delete/<int:uId>/<int:fid>')
+def delete(uId,fid):
+    db = get_db()
+    db.deleteFinance(uId,fid)
+    return redirect(url_for('home',userId=uId))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
