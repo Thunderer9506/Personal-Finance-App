@@ -1,3 +1,22 @@
+#NOTE: Add following things in this project
+# SQLAlchemy ORM
+
+# Relational database schema design
+
+# Password encryption (bcrypt, argon2)
+
+# Sessions + cookies
+
+# JWT tokens
+
+# Role-based access control: This simplifies access management by ensuring users only have the permissions they need for their specific job function
+
+# Modular Flask architecture
+
+# Microservice split (auth service, finance service)
+
+# Pagination & filtering
+
 from flask import Flask,render_template,request,redirect,url_for,g
 from datetime import datetime
 from db import Database
