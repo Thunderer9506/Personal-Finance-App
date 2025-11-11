@@ -135,26 +135,26 @@
                          {% for item in history[::-1] %}
                             <div class="transaction-item expense">
                                 <div class="transaction-info">
-                                    <h4>{{item[4]}}</h4>
-                                    {% if item[5] %}
-                                        <p>{{item[5]}}</p>
+                                    <h4>{{item.category}}</h4>
+                                    {% if item.description %}
+                                        <p>{{item.description}}</p>
                                     {% else %}
                                         <p>No Description</p>
                                     {% endif %}
-                                    {% if item[2] == 'Expense' %}
+                                    {% if item.type == 'Expense' %}
                                         <span class="transaction-type" style="color: #ef4444;">expense</span>
-                                    {% elif item[2] == 'Income' %}
+                                    {% elif item.type == 'Income' %}
                                         <span class="transaction-type" style="color: #22c55e;">income</span>
                                     {% endif %}
                                 </div>
                                 <div class="transaction-amount">
-                                    {% if item[2] == 'Expense' %}
-                                        <div class="amount"  style="color: #ef4444;">-₹{{item[3]}}</div>
-                                    {% elif item[2] == 'Income' %}
-                                        <div class="amount"  style="color: #22c55e;">+₹{{item[3]}}</div>
+                                    {% if item.type == 'Expense' %}
+                                        <div class="amount"  style="color: #ef4444;">-₹{{item.amount}}</div>
+                                    {% elif item.type == 'Income' %}
+                                        <div class="amount"  style="color: #22c55e;">+₹{{item.amount}}</div>
                                     {% endif %}
-                                    <div class="date">{{item[6]}}</div>
-                                    <a class="delete" href="{{url_for('delete',uId = userId,fid=item[0])}}">🗑️</a>
+                                    <div class="date">{{item.date}}</div>
+                                    <a class="delete" href="{{url_for('delete',uId = item.userId,fid=item.id)}}">🗑️</a>
                                 </div>
                             </div>
                          {% endfor %}
