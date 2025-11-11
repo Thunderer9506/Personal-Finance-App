@@ -18,8 +18,8 @@ engine = create_engine("sqlite:///./instance/finance.db")
 class User(db.Model):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
-    fullName: Mapped[str] = mapped_column(String, nullable=False)
-    phoneNumber: Mapped[int] = mapped_column(Integer,unique=True, nullable=False)
+    email:Mapped[str] = mapped_column(String,nullable=False)
+    password: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     transactions: Mapped[List["Transaction"]] = relationship(back_populates="user")
 
     def __repr__(self):
