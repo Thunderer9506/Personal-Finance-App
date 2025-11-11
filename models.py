@@ -1,20 +1,21 @@
 from sqlalchemy import String, Integer, Text,create_engine, Date, ForeignKey, select
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship, sessionmaker
 from datetime import date,datetime
+from extensions import db
 from typing import List
 
 # ---------- Engine ----------
 engine = create_engine("sqlite:///./instance/finance.db")
 
 # ---------- Base ----------
-class Base(DeclarativeBase):
-    pass
+# class Base(DeclarativeBase):
+#     pass
 
 # ---------- Session Factory ----------
-SessionLocal = sessionmaker(bind=engine, autoflush=False)
+# SessionLocal = sessionmaker(bind=engine, autoflush=False)
 
 # ---------- Models ----------
-class User(Base):
+class User(db.Model):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
     fullName: Mapped[str] = mapped_column(String, nullable=False)
@@ -24,7 +25,7 @@ class User(Base):
     def __repr__(self):
         return f"<User: Id:{self.id}, Full Name:{self.fullName}, Phone Number:{self.phoneNumber}>"
 
-class Transaction(Base):
+class Transaction(db.Model):
     __tablename__ = "transactions"
     id: Mapped[int] = mapped_column(primary_key=True)
     type: Mapped[str] = mapped_column(String,nullable=False)
@@ -38,8 +39,6 @@ class Transaction(Base):
     def __repr__(self):
         return f"<Transaction: Id:{self.id}, Type:{self.type}, Amount:{self.amount}, Category:{self.category}, Description:{self.description},  Date:{self.date},  User_Id:{self.userId}> "
     
-def create_table():
-    Base.metadata.create_all(engine)
 
 # if __name__ == "__main__":
     # Base.metadata.create_all(engine)
