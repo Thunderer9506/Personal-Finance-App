@@ -1,7 +1,4 @@
 #NOTE: Add following things in this project
-# SQLAlchemy ORM
-
-# Relational database schema design
 
 # Password encryption (bcrypt, argon2)
 
@@ -17,108 +14,127 @@
 
 # Pagination & filtering
 
-from flask import Flask,render_template,request,redirect,url_for,g
+from flask import Flask,render_template,request,redirect,url_for
 from datetime import datetime
-from db import Database
+from sqlalchemy import select, and_
+from extensions import db
 
 app = Flask(__name__)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///finance.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db.init_app(app)
+
+with app.app_context():
+    # import models AFTER initializing db
+    from models import User, Transaction
+    db.create_all()
 
 todaysDate = datetime.now().strftime("%Y-%m-%d")
 expenseCategory = [None,'Food','Transportation','Bill','Shopping','Education', 'Rent', 'Entertainment', 'Investment']
 incomeCategory = [None,'Salary','Awards','Coupons','Grants','Rental', 'Freelance']
 
+# ---- Util Functions ----
 @app.context_processor
 def inject_global():
-    return {'date': todaysDate}
+    return {'date': todaysDate,'expense': expenseCategory, 'income': incomeCategory}
 
-def get_db():
-    if 'db' not in g:
-        g.db = Database()
-    return g.db
-
-@app.teardown_appcontext
-def close_db(exception):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
+def getAmount(history):
+    sum = 0
+    for i in history:
+        if i.type == "Expense":
+            sum -= i.amount
+        elif i.type == "Income":
+            sum += i.amount
+    return sum
 
 @app.route("/", methods=["GET", "POST"])
 def login():
-    db = get_db()
     if request.method == "POST":
         phone = request.form.get("phone")
         name = request.form.get('name')
-        userId = db.find_user(name,phone)
-        return redirect(url_for('home',userId = userId)) 
+        
+        stmt = select(User).where(
+            and_(
+                User.fullName == name,
+                User.phoneNumber == phone
+                ))
+        user = db.session.execute(stmt).scalar()
+        return redirect(url_for('home',userId = user.id))
     return render_template('login.html')  
 
 @app.route("/signup", methods=['GET', 'POST'])  
 def signup():
-    db = get_db()
     if request.method == "POST":
         phone = request.form.get("phone")
         name = request.form.get('name')
-        uId = db.insert_newUser(name,phone)
-        return redirect(url_for('home',userId = uId)) 
-    return render_template('signup.html')  
+        stmt = User(fullName= name,phoneNumber= phone)
+        db.session.add(stmt)
+        db.session.flush()
+        uId = stmt.id
+        db.session.commit()
+        return redirect(url_for('home',userId = uId))
+    return render_template('signup.html')
 
 
 @app.route("/home/<int:userId>", methods=["GET", "POST"])
-def home(userId):        
-    db = get_db()                        
+def home(userId):
+    user = db.get_or_404(User,userId,description=f"No user named '{userId}'.")
     if request.method == "POST":
         amount = float(request.form.get("amount"))
         transaction_type = request.form.get("transactionType")
         category = request.form.get("categories")
         description = request.form.get("description")
-        if not description:
-            description = "No Description"
-        db.insert_newFinance(userId, transaction_type, amount, category, description.capitalize(), todaysDate)
-
+        transac = Transaction(type=transaction_type,amount=amount,category=category,
+                              description = [None if not description else description.capitalize()][0],
+                              userId = userId)
+        user.transactions.append(transac)
+        db.session.commit()
+    transacHistory = user.transactions
     return render_template(
         'index.html',
-        category={'expense': expenseCategory, 'income': incomeCategory},
-        history=db.fetchData_finance(userId),    
-        amount=db.getAmount(userId),     
+        history=transacHistory,    
+        amount=getAmount(transacHistory),     
         userId = userId
     )
 
 @app.route('/filter/<int:userId>', methods=["POST"])
 def filter(userId):
-    db = get_db()
-    filter_type = request.form.get("filterType")
+    user = db.get_or_404(User,userId,description=f"No user named '{userId}'.")
+    filter_type = request.form.get("filterType") or None
     filter_category = request.form.get("filterCategories")
-    filter_date = request.form.get("date")
-    
-    filters = {}
-    if filter_type:
-        filters['type'] = filter_type
-    else:
-        filters['type'] = None
-    if filter_category != "None":
-        filters['category'] = filter_category
-    else:
-        filters['category'] = None
-    if filter_date:
-        filters['date'] = filter_date
-    else:
-        filters['date'] = None
+    filter_date = request.form.get("date") or None
 
-    filtered_history = db.filterData(userId,filters['type'],filters['category'],filters['date'])
-    
+    if filter_category == "None":
+        filter_category = None
+
+    query = Transaction.query.filter_by(userId=user.id)
+
+    if filter_type:
+        query = query.filter_by(type=filter_type)
+
+    if filter_category:
+        query = query.filter_by(category=filter_category)
+
+    if filter_date:
+        query = query.filter_by(date=datetime.strptime(filter_date,"%Y-%m-%d"))
+
+    filtered_history = query.all()
+
     return render_template(
-        'index.html',
-        category={'expense':expenseCategory, 'income':incomeCategory},
+        "index.html",
         history=filtered_history,
-        amount=db.getAmount(userId),
-        userId = userId
+        amount=getAmount(user.transactions),
+        userId=userId
     )
 
 @app.route('/delete/<int:uId>/<int:fid>')
 def delete(uId,fid):
-    db = get_db()
-    db.deleteFinance(uId,fid)
+    transac = db.get_or_404(Transaction,fid)
+    db.session.delete(transac)
+    db.session.commit()
     return redirect(url_for('home',userId=uId))
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True)
