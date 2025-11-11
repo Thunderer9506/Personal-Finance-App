@@ -55,18 +55,18 @@
                         <div class="input-group" id="subcategoryGroup">
                             <label for="categories">Choose Category</label>
                             <select name="categories" id="categories" required>
-                                {% for item in category.expense[1:] %}
+                                {% for item in expense[1:] %}
                                     <option value="{{item}}">{{item}}</option>
                                 {% endfor %}
                             </select>
                             <!-- Hidden selects for JS -->
                             <select id="expenseOptions" style="display:none;" required>
-                                {% for item in category.expense[1:] %}
+                                {% for item in expense[1:] %}
                                     <option value="{{item}}">{{item}}</option>
                                 {% endfor %}
                             </select>
                             <select id="incomeOptions" style="display:none;" required>
-                                {% for item in category.income[1:] %}
+                                {% for item in income[1:] %}
                                     <option value="{{item}}">{{item}}</option>
                                 {% endfor %}
                             </select>
@@ -101,17 +101,17 @@
                                 <div class="category">
                                     <label for="filterCategories">Choose Category</label>
                                     <select name="filterCategories" id="filterCategories">
-                                        {% for item in category.expense %}
+                                        {% for item in expense %}
                                             <option value="{{item}}">{{item}}</option>
                                         {% endfor %}
                                     </select>
                                     <select id="filterExpenseOptions" style="display:none;">
-                                        {% for item in category.expense %}
+                                        {% for item in expense %}
                                             <option value="{{item}}">{{item}}</option>
                                         {% endfor %}
                                     </select>
                                     <select id="filterIncomeOptions" style="display:none;">
-                                        {% for item in category.income %}
+                                        {% for item in income %}
                                             <option value="{{item}}">{{item}}</option>
                                         {% endfor %}
                                     </select>   
