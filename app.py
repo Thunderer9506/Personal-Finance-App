@@ -1,7 +1,5 @@
 #NOTE: Add following things in this project
 
-# Password encryption (bcrypt, argon2)
-
 # Sessions + cookies
 
 # JWT tokens
@@ -18,8 +16,11 @@ from flask import Flask,render_template,request,redirect,url_for
 from datetime import datetime
 from sqlalchemy import select, and_
 from extensions import db
+from argon2 import PasswordHasher
+import uuid
 
 app = Flask(__name__)
+ph = PasswordHasher()
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///finance.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -52,41 +53,47 @@ def getAmount(history):
 @app.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        phone = request.form.get("phone")
-        name = request.form.get('name')
+        email = request.form.get("email")
+        password = request.form.get("password")
         
-        stmt = select(User).where(
-            and_(
-                User.fullName == name,
-                User.phoneNumber == phone
-                ))
+        stmt = select(User).where(User.email == email)
         user = db.session.execute(stmt).scalar()
-        return redirect(url_for('home',userId = user.id))
+        if user.email == email:
+            try:
+                pass_verify = ph.verify(user.password,password)
+                print(pass_verify)
+                
+                if pass_verify:
+                    return redirect(url_for('home',userId = user.id))
+                else:
+                    return redirect(url_for('login'))
+            except Exception as e:
+                print(e)
+                return redirect(url_for('login'))
     return render_template('login.html')  
 
 @app.route("/signup", methods=['GET', 'POST'])  
 def signup():
     if request.method == "POST":
-        phone = request.form.get("phone")
-        name = request.form.get('name')
-        stmt = User(fullName= name,phoneNumber= phone)
+        email = request.form.get("email")
+        password = request.form.get("password")
+        userId = uuid.uuid4()
+        stmt = User(id = userId,password= ph.hash(password),email= email)
         db.session.add(stmt)
-        db.session.flush()
-        uId = stmt.id
         db.session.commit()
-        return redirect(url_for('home',userId = uId))
+
+        return redirect(url_for('home',userId = userId))
     return render_template('signup.html')
 
-
-@app.route("/home/<int:userId>", methods=["GET", "POST"])
+@app.route("/home/<uuid:userId>", methods=["GET", "POST"])
 def home(userId):
-    user = db.get_or_404(User,userId,description=f"No user named '{userId}'.")
+    user = db.get_or_404(User,userId,description=f"No user with id '{userId}'.")
     if request.method == "POST":
         amount = float(request.form.get("amount"))
         transaction_type = request.form.get("transactionType")
         category = request.form.get("categories")
         description = request.form.get("description")
-        transac = Transaction(type=transaction_type,amount=amount,category=category,
+        transac = Transaction(id=uuid.uuid4(),type=transaction_type,amount=amount,category=category,
                               description = [None if not description else description.capitalize()][0],
                               userId = userId)
         user.transactions.append(transac)
@@ -99,9 +106,9 @@ def home(userId):
         userId = userId
     )
 
-@app.route('/filter/<int:userId>', methods=["POST"])
+@app.route('/filter/<uuid:userId>', methods=["POST"])
 def filter(userId):
-    user = db.get_or_404(User,userId,description=f"No user named '{userId}'.")
+    user = db.get_or_404(User,userId,description=f"No user with id '{userId}'.")
     filter_type = request.form.get("filterType") or None
     filter_category = request.form.get("filterCategories")
     filter_date = request.form.get("date") or None
@@ -129,12 +136,12 @@ def filter(userId):
         userId=userId
     )
 
-@app.route('/delete/<int:uId>/<int:fid>')
-def delete(uId,fid):
-    transac = db.get_or_404(Transaction,fid)
+@app.route('/delete/<uuid:userId>/<uuid:transacId>')
+def delete(userId,transacId):
+    transac = db.get_or_404(Transaction,transacId)
     db.session.delete(transac)
     db.session.commit()
-    return redirect(url_for('home',userId=uId))
+    return redirect(url_for('home',userId=userId))
 
 if __name__ == "__main__":
     app.run(debug=True)
