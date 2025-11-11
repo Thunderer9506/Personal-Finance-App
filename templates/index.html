@@ -154,7 +154,7 @@
                                         <div class="amount"  style="color: #22c55e;">+₹{{item.amount}}</div>
                                     {% endif %}
                                     <div class="date">{{item.date}}</div>
-                                    <a class="delete" href="{{url_for('delete',uId = item.userId,fid=item.id)}}">🗑️</a>
+                                    <a class="delete" href="{{url_for('delete',userId = item.userId,transacId=item.id)}}">🗑️</a>
                                 </div>
                             </div>
                          {% endfor %}
