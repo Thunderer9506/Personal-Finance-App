@@ -3,6 +3,7 @@ from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship,
 from datetime import date,datetime
 from extensions import db
 from typing import List
+import uuid
 
 # ---------- Engine ----------
 engine = create_engine("sqlite:///./instance/finance.db")
@@ -17,7 +18,7 @@ engine = create_engine("sqlite:///./instance/finance.db")
 # ---------- Models ----------
 class User(db.Model):
     __tablename__ = "users"
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True,autoincrement=False,default=uuid.uuid4())
     email:Mapped[str] = mapped_column(String,nullable=False)
     password: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     transactions: Mapped[List["Transaction"]] = relationship(back_populates="user")
@@ -27,7 +28,7 @@ class User(db.Model):
 
 class Transaction(db.Model):
     __tablename__ = "transactions"
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True,autoincrement=False,default=uuid.uuid1())
     type: Mapped[str] = mapped_column(String,nullable=False)
     amount: Mapped[int] = mapped_column(Integer,nullable=False)
     category: Mapped[str] = mapped_column(String,nullable=False)
