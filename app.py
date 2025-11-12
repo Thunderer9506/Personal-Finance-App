@@ -1,7 +1,5 @@
 #NOTE: Add following things in this project
 
-# Sessions + cookies
-
 # JWT tokens
 
 # Role-based access control: This simplifies access management by ensuring users only have the permissions they need for their specific job function
@@ -12,18 +10,21 @@
 
 # Pagination & filtering
 
-from flask import Flask,render_template,request,redirect,url_for
-from datetime import datetime
+from flask import Flask,render_template,request,redirect,url_for, session
+from datetime import datetime, timedelta
 from sqlalchemy import select, and_
 from extensions import db
 from argon2 import PasswordHasher
 import uuid
+from functools import wraps
 
 app = Flask(__name__)
 ph = PasswordHasher()
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///finance.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.secret_key = "good_secret_key"
+app.permanent_session_lifetime = timedelta(days=7)
 
 db.init_app(app)
 
@@ -50,7 +51,21 @@ def getAmount(history):
             sum += i.amount
     return sum
 
-@app.route("/", methods=["GET", "POST"])
+def login_req(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if "user_id" in session:
+            return func(*args, **kwargs)
+        return redirect(url_for('login'))
+    return wrapper
+
+@app.route("/")
+def init():
+    if "user_id" in session:
+            return redirect(url_for('home',userId=session['user_id']))
+    return redirect(url_for('login'))
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         email = request.form.get("email")
@@ -61,9 +76,10 @@ def login():
         if user.email == email:
             try:
                 pass_verify = ph.verify(user.password,password)
-                print(pass_verify)
-                
                 if pass_verify:
+                    session['user_id'] = user.id
+                    session['email'] = user.email
+                    session.permanent = True
                     return redirect(url_for('home',userId = user.id))
                 else:
                     return redirect(url_for('login'))
@@ -82,10 +98,11 @@ def signup():
         db.session.add(stmt)
         db.session.commit()
 
-        return redirect(url_for('home',userId = userId))
+        return redirect(url_for('login'))
     return render_template('signup.html')
 
 @app.route("/home/<uuid:userId>", methods=["GET", "POST"])
+@login_req
 def home(userId):
     user = db.get_or_404(User,userId,description=f"No user with id '{userId}'.")
     if request.method == "POST":
@@ -107,6 +124,7 @@ def home(userId):
     )
 
 @app.route('/filter/<uuid:userId>', methods=["POST"])
+@login_req
 def filter(userId):
     user = db.get_or_404(User,userId,description=f"No user with id '{userId}'.")
     filter_type = request.form.get("filterType") or None
@@ -137,8 +155,9 @@ def filter(userId):
     )
 
 @app.route('/delete/<uuid:userId>/<uuid:transacId>')
+@login_req
 def delete(userId,transacId):
-    transac = db.get_or_404(Transaction,transacId)
+    transac = db.get_or_404(Transaction,transacId,description=f"No transaction with id '{userId}'.")
     db.session.delete(transac)
     db.session.commit()
     return redirect(url_for('home',userId=userId))
