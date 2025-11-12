@@ -14,6 +14,15 @@ The **Personal Finance App** is a web-based application designed to help users m
 
 ---
 
+## V2 - Update
+- Login & Signup: Now everyone can use this Web-App
+- SQL Alchemy: switched from sqlite 3 to SQLalchemy ORM Version and Flask-SQLAlchemy for managing database
+- Sessions: Added Sessions for users for System-Design
+- Security: For better security, password is encrypted using **Argon2** and row Id's are generated using UUID4
+- Better Code: Rewrote the bad code that may issue some problem in the future
+
+---
+
 ## 🚀 Features
 
 - **Add Transactions:** Log both expenses and incomes with categories, amounts, and descriptions.
@@ -44,12 +53,14 @@ The **Personal Finance App** is a web-based application designed to help users m
 .
 ├── db.py                # Database logic (CRUD, filtering, etc.)
 ├── finance.db           # SQLite database file
-├── main.py              # Flask application (routes, logic)
+├── app.py              # Flask application (routes, logic)
 ├── static/
 │   ├── main.js          # JavaScript for UI interactivity
 │   └── style.css        # Custom CSS styles
 ├── templates/
-│   └── index.html       # Main HTML template (Jinja2)
+│   ├── index.html       # Main HTML template (Jinja2)
+│   ├── login.html       # Login page
+│   └── signup.html      # Signup page
 └── README.md            # Project documentation
 ```
 
