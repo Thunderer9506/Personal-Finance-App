@@ -1,29 +1,26 @@
-#NOTE: Add following things in this project
+# ---- Future Improvement ----
+# Add a pop up notification system where whether user added a transaction or delete it or put a password or email wrong or sign up
+# Try to add some more features to it
 
-# JWT tokens
-
-# Role-based access control: This simplifies access management by ensuring users only have the permissions they need for their specific job function
-
-# Modular Flask architecture
-
-# Microservice split (auth service, finance service)
-
-# Pagination & filtering
-
+# ---- Dependencies ----
 from flask import Flask,render_template,request,redirect,url_for, session
 from datetime import datetime, timedelta
-from sqlalchemy import select, and_
+from sqlalchemy import select
 from extensions import db
 from argon2 import PasswordHasher
 import uuid
 from functools import wraps
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
+# ---- Config ----
 app = Flask(__name__)
 ph = PasswordHasher()
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///finance.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('SQLITE_URI')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.secret_key = "good_secret_key"
+app.secret_key = os.getenv('SECRET_KEY')
 app.permanent_session_lifetime = timedelta(days=7)
 
 db.init_app(app)
@@ -59,6 +56,7 @@ def login_req(func):
         return redirect(url_for('login'))
     return wrapper
 
+# ---- Routes ----
 @app.route("/")
 def init():
     if "user_id" in session:
@@ -73,19 +71,20 @@ def login():
         
         stmt = select(User).where(User.email == email)
         user = db.session.execute(stmt).scalar()
-        if user.email == email:
-            try:
-                pass_verify = ph.verify(user.password,password)
-                if pass_verify:
-                    session['user_id'] = user.id
-                    session['email'] = user.email
-                    session.permanent = True
-                    return redirect(url_for('home',userId = user.id))
-                else:
+        if user:
+            if user.email == email:
+                try:
+                    pass_verify = ph.verify(user.password,password)
+                    if pass_verify:
+                        session['user_id'] = user.id
+                        session['email'] = user.email
+                        session.permanent = True
+                        return redirect(url_for('home',userId = user.id))
+                    else:
+                        return redirect(url_for('login'))
+                except Exception as e:
+                    print(e)
                     return redirect(url_for('login'))
-            except Exception as e:
-                print(e)
-                return redirect(url_for('login'))
     return render_template('login.html')  
 
 @app.route("/signup", methods=['GET', 'POST'])  
